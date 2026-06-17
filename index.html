@@ -37,7 +37,7 @@
 <body>
   <div id="root"></div>
 
-  <script type="text/babel">
+  <script type="text/babel" data-presets="react">
     const { useState, useMemo, Fragment } = React;
 
     // --- アイコンコンポーネント (Lucide Reactの代替としてインラインSVGを定義) ---
@@ -901,8 +901,27 @@
       );
     }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<MortgageSimulator />);
+    // Render.com 上で白画面になった場合に原因を確認しやすくするため、
+    // React の描画処理を try/catch で囲んでいます。
+    const rootElement = document.getElementById('root');
+
+    try {
+      if (!rootElement) {
+        throw new Error('描画先の #root が見つかりません。');
+      }
+
+      const root = ReactDOM.createRoot(rootElement);
+      root.render(<MortgageSimulator />);
+    } catch (error) {
+      console.error('アプリの描画に失敗しました:', error);
+      rootElement.innerHTML = `
+        <div style="padding: 24px; font-family: sans-serif; color: #b91c1c;">
+          <h1 style="font-size: 20px; font-weight: bold;">アプリの読み込みに失敗しました</h1>
+          <p>Console に表示されているエラーを確認してください。</p>
+          <pre style="white-space: pre-wrap; background: #fee2e2; padding: 12px; border-radius: 8px;">${error.message}</pre>
+        </div>
+      `;
+    }
   </script>
 </body>
 </html>
